@@ -1,8 +1,4 @@
-# -*- coding: utf-8 -*-
-# @Time : 2019/6/1 下午7:29
-# @Author : Sophie_Zhang
-# @File : metric.py
-# @Software: PyCharm
+
 
 import torch
 from data import Data, IronyDataset

@@ -1,8 +1,4 @@
-# -*- coding: utf-8 -*-
-# @Time : 2019/6/1 下午2:21
-# @Author : Sophie_Zhang
-# @File : data.py
-# @Software: PyCharm
+
 
 import json
 import numpy as np

@@ -1,8 +1,4 @@
-# -*- coding: utf-8 -*-
-# @Time : 2019/6/1 下午4:19
-# @Author : Sophie_Zhang
-# @File : model.py
-# @Software: PyCharm
+
 
 import copy
 import numpy as np
@@ -56,10 +52,6 @@ class BLSTM(nn.Module):
 
         return out.float()
 
-# #### Attention
-# scaled dot product attention:
-#  $\text { Attention }(Q, K, V)=\operatorname{softmax}\left(\frac{Q K^{T}}{\sqrt{d_{k}}}\right) V$
-
 def scaled_dot_product_attention(query, key, value, mask=None, dropout=0.5):
     dim_key = query.size(-1)
     # print(dim_key)
@@ -76,12 +68,6 @@ def scaled_dot_product_attention(query, key, value, mask=None, dropout=0.5):
     if dropout is not None:
         attn_weights = dropout(attn_weights)
     return torch.matmul(attn_weights, value), attn_weights
-
-# Self attention: K=V=Q
-# each word in the sentence needs to undergo Attention computation, to capture the internal structure of the sentence
-#
-# Multi-head Attention: query, key, and value first go through a linear transformation and then enters into Scaled-Dot Attention. Here, the attention is calculated h times, which allows the model to learn relevant information in different representative child spaces.
-# When #head=1, it becomes a original self-attention layer.
 
 class MultiHeadedAttention(nn.Module):
     def __init__(self, num_heads, dim_model, dropout=0.5):
@@ -114,16 +100,6 @@ class MultiHeadedAttention(nn.Module):
         query = self.w_q(query).view(n_batch, -1, self.num_h, self.dim_qkv).permute(2, 0, 1, 3)
         key = self.w_k(key).view(n_batch, -1, self.num_h, self.dim_qkv).permute(2, 0, 1, 3)
         value = self.w_v(value).view(n_batch, -1, self.num_h, self.dim_qkv).permute(2, 0, 1, 3)
-
-        # query = self.w_q(query).view(n_batch, -1, self.num_h, self.dim_qkv)
-        # key = self.w_k(key).view(n_batch, -1, self.num_h, self.dim_qkv)
-        # value = self.w_v(value).view(n_batch, -1, self.num_h, self.dim_qkv)
-
-        # query=query.permute(2,0,1,3)
-        # query=query.view(n_batch*self.num_h,-1,self.dim_qkv)
-
-        # print("query shape:{}".format(query.shape))
-
         # Apply attention on all the projected vectors in batch
         x, self.attn = scaled_dot_product_attention(query, key, value, mask=mask, dropout=self.dropout)
         x = x.permute(1, 2, 0, 3)
@@ -156,11 +132,6 @@ class PositionwiseFeedForward(nn.Module):
         return self.w_2(self.dropout(self.activation(self.w_1(x))))
 
 
-# #### Add & Norm
-# `Residual connection`是对于较为深层的神经网络有比较好的作用，比如网络层很深时，数值的传播随着weight不断的减弱，`Residual connection`是从输入的部分，连到它输出层的部分，把输入的信息原封不动copy到输出的部分，减少信息的损失。
-# `layer-normalization`这种归一化层是为了防止在某些层中由于某些位置过大或者过小导致数值过大或过小，对神经网络梯度回传时有训练的问题，保证训练的稳定性。基本在每个子网络后面都要加上`layer-normalization`、加上`Residual connection`，加上这两个部分能够使深层神经网络训练更加顺利。
-# (本实验中也许不需要)
-
 class AddNorm(nn.Module):
     def __init__(self, size, dropout, eps=1e-6):
         super(AddNorm, self).__init__()
@@ -179,12 +150,6 @@ class AddNorm(nn.Module):
         norm = self.NormLayer(x)
         return x + self.dropout(sublayer(norm))
 
-
-# #### Encoder
-# self-attention layers: all of the keys, values and queries come from the previous layer in the encoder. Each position in the encoder can attend to all positions in the previous layer of the encoder.
-
-# 一层Encoder: self-atten --> add&norm --> feed-forward --> add&norm
-# 浅层网络可以去掉add&norm层？
 class EncoderLayer(nn.Module):
     def __init__(self, size, attention, feed_forward, dropout=0.5):
         super(EncoderLayer, self).__init__()
@@ -275,13 +240,6 @@ class SelfAttenClassifier(nn.Module):
         # BiLSTM -> transformer -> classifier
         batch_size = input_embeds.size(1)
         # bilstm_out = self.bilstm(input_embeds)
-        # encoder_out = self.encoder(bilstm_out, mask_tensor)
-        # # Simply average the final sequence position representations to create a fixed size "sentence representation".
-        # #         sentence_representation = tf.reduce_mean(encoder_output, axis=1)    # [batch_size, model_dim]
-        # feats = encoder_out.sum(dim=1)
-        # #         print(encoder_out.size(), feats.size())
-        # outputs = self.classifier(feats, add_feature)
-        # outputs = self.classifier(bilstm_out, add_feature)
 
         # transformer -> BiLSTM -> classifier
         encoder_out = self.encoder(input_embeds, mask_tensor)

@@ -1,8 +1,4 @@
-# -*- coding: utf-8 -*-
-# @Time : 2019/6/1 下午2:14
-# @Author : Sophie_Zhang
-# @File : config.py
-# @Software: PyCharm
+
 
 import os
 import torch

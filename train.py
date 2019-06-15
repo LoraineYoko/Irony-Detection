@@ -1,8 +1,3 @@
-# -*- coding: utf-8 -*-
-# @Time : 2019/6/1 下午7:08
-# @Author : Sophie_Zhang
-# @File : train.py
-# @Software: PyCharm
 
 import os, time
 import numpy as np
